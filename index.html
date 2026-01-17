@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Asistencia Orquestando</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <img src="logo-orquestando.png" class="logo" />
+
+    <h1>Registro de Asistencia</h1>
+
+    <label>Educador</label>
+    <select id="educador">
+      <option value="">Seleccione educador</option>
+      <option>Ana</option>
+      <option>Carlos</option>
+      <option>María</option>
+    </select>
+
+    <label>Horario</label>
+    <select id="horario">
+      <option value="">Seleccione horario</option>
+      <option>08:00 - 09:00</option>
+      <option>09:00 - 10:00</option>
+      <option>10:00 - 11:00</option>
+    </select>
+
+    <label>Grupo de niños</label>
+    <select id="grupo"></select>
+
+    <button onclick="registrarAsistencia()">Registrar Asistencia</button>
+
+    <hr>
+
+    <button onclick="activarAdmin()">Modo Administrador</button>
+
+    <div id="adminPanel" class="hidden">
+      <h2>Panel Administrador</h2>
+      <div id="registros"></div>
+    </div>
+
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
