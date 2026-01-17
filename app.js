@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Cargar niños desde CSV
-fetch("ninos.csv")
+const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/main/ninos.csv";
   .then(res => res.text())
   .then(data => {
     const filas = data.split("\n");
