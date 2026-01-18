@@ -40,7 +40,7 @@ th, td {
   text-align: center;
 }
 
-select, input[type="date"] {
+select, input[type="date"], input[type="month"] {
   padding: 5px;
   margin: 5px;
 }
@@ -51,9 +51,30 @@ button {
   cursor: pointer;
 }
 
-#reporte table {
-  margin-top: 10px;
+#panel-mensual {
+  margin-top: 20px;
+  background: rgba(0,0,0,.6);
+  padding: 15px;
+  display: none;
 }
+
+#calendario table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+#calendario td {
+  border: 1px solid #fff;
+  padding: 5px;
+  min-width: 40px;
+  vertical-align: top;
+}
+
+.asistencia-A { color: #00ff00; font-weight:bold; }
+.asistencia-T { color: yellow; font-weight:bold; }
+.asistencia-J { color: cyan; font-weight:bold; }
+.asistencia-F { color: red; font-weight:bold; }
 </style>
 </head>
 
@@ -86,9 +107,25 @@ button {
 </table>
 
 <button onclick="guardar()">Guardar Asistencia</button>
-<button onclick="verMensual()">Ver Asistencias Mensual</button>
+<button onclick="abrirPanelMensual()">Ver Asistencias Mensual</button>
 
-<div id="reporte"></div>
+<!-- PANEL PARA VER ASISTENCIAS MENSUALES -->
+<div id="panel-mensual">
+  <h3>Consulta mensual</h3>
+
+  <label>Educador:</label>
+  <select id="m-educador"></select>
+
+  <label>Grupo:</label>
+  <select id="m-grupo"></select>
+
+  <label>Mes:</label>
+  <input type="month" id="m-mes">
+
+  <button onclick="generarCalendario()">Ver</button>
+
+  <div id="calendario"></div>
+</div>
 
 <script src="script.js"></script>
 </body>
