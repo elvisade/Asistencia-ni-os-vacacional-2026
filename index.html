@@ -16,13 +16,13 @@ h1 {
 }
 
 .controls {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: white;
 }
 
 th, td {
@@ -32,7 +32,6 @@ th, td {
 }
 
 select {
-  width: 60px;
   font-size: 14px;
 }
 
@@ -46,16 +45,11 @@ button {
 
 <body>
 
-<h1>Asistencia Niños – Orquestando 2026</h1>
+<h1>Asistencia – Orquestando 2026</h1>
 
 <div class="controls">
   <label>Educador:</label>
-  <select id="educador">
-    <option value="">Seleccione</option>
-    <option value="Educador 1">Educador 1</option>
-    <option value="Educador 2">Educador 2</option>
-    <option value="Educador 3">Educador 3</option>
-  </select>
+  <select id="educador"></select>
 
   <label>Fecha:</label>
   <input type="date" id="fecha">
@@ -65,6 +59,7 @@ button {
   <thead>
     <tr>
       <th>Alumno</th>
+      <th>Grupo</th>
       <th>Asistencia</th>
     </tr>
   </thead>
@@ -75,75 +70,103 @@ button {
 
 <script type="module">
 import { db } from "./firebase.js";
-import {
-  collection,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, addDoc }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/main/ninos.csv";
-let ninos = [];
+const CSV_URL =
+"https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/main/alumnos.csv";
 
-// Cargar niños
+let alumnos = [];
+let educadores = new Set();
+
+// 🔹 CARGAR CSV
 fetch(CSV_URL)
   .then(res => res.text())
-  .then(data => {
-    const filas = data.trim().split("\n");
-    filas.shift();
+  .then(texto => {
+    const filas = texto.trim().split("\n");
+    filas.shift(); // quitar encabezado
 
     filas.forEach(fila => {
-      const [dni, nombre] = fila.split(",");
-      ninos.push({ dni, nombre });
+      const [educador, grupo, nombres, apellidos] = fila.split(",");
+
+      alumnos.push({
+        educador,
+        grupo,
+        nombreCompleto: `${nombres} ${apellidos}`
+      });
+
+      educadores.add(educador);
     });
 
-    renderTabla();
+    cargarEducadores();
   });
 
+// 🔹 LLENAR SELECT EDUCADORES
+function cargarEducadores() {
+  const sel = document.getElementById("educador");
+  sel.innerHTML = `<option value="">Seleccione</option>`;
+
+  educadores.forEach(e => {
+    sel.innerHTML += `<option value="${e}">${e}</option>`;
+  });
+
+  sel.addEventListener("change", renderTabla);
+}
+
+// 🔹 MOSTRAR TABLA POR EDUCADOR
 function renderTabla() {
+  const educadorSel = document.getElementById("educador").value;
   const tbody = document.getElementById("tabla");
   tbody.innerHTML = "";
 
-  ninos.forEach(n => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${n.nombre}</td>
-        <td>
-          <select data-dni="${n.dni}" data-nombre="${n.nombre}">
-            <option value="">-</option>
-            <option value="A">A</option>
-            <option value="T">T</option>
-            <option value="J">J</option>
-            <option value="F">F</option>
-          </select>
-        </td>
-      </tr>
-    `;
-  });
+  alumnos
+    .filter(a => a.educador === educadorSel)
+    .forEach(a => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${a.nombreCompleto}</td>
+          <td>${a.grupo}</td>
+          <td>
+            <select
+              data-nombre="${a.nombreCompleto}"
+              data-grupo="${a.grupo}"
+              data-educador="${a.educador}">
+              <option value="">-</option>
+              <option value="A">A</option>
+              <option value="T">T</option>
+              <option value="J">J</option>
+              <option value="F">F</option>
+            </select>
+          </td>
+        </tr>
+      `;
+    });
 }
 
+// 🔹 GUARDAR ASISTENCIA
 window.guardarAsistencia = async () => {
-  const educador = document.getElementById("educador").value;
   const fecha = document.getElementById("fecha").value;
 
-  if (!educador || !fecha) {
-    alert("Seleccione educador y fecha");
+  if (!fecha) {
+    alert("Seleccione fecha");
     return;
   }
 
-  const selects = document.querySelectorAll("select[data-dni]");
+  const selects = document.querySelectorAll("select[data-nombre]");
 
   for (let s of selects) {
     if (s.value !== "") {
       await addDoc(collection(db, "asistencias"), {
-        dni: s.dataset.dni,
-        nombre: s.dataset.nombre,
-        fecha,
-        estado: s.value,
-        educador
+        educador: s.dataset.educador,
+        grupo: s.dataset.grupo,
+        alumno: s.dataset.nombre,
+        fecha: fecha,
+        estado: s.value
       });
     }
   }
 
-  alert("Asistencia guardada correctamente ✔");
+  alert("Asistencia registrada correctamente ✔");
 };
 </script>
 
