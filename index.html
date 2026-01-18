@@ -2,188 +2,40 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Asistencia Orquestando 2026</title>
+<title>Asistencia – Orquestando 2026</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  margin: 20px;
-}
-
-h1 {
-  text-align: center;
-}
-
-.controls {
-  margin-bottom: 15px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-
-th, td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: center;
-}
-
-select {
-  font-size: 14px;
-}
-
-button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  font-size: 16px;
-}
+body { font-family: Arial; padding: 20px; }
+table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+th, td { border: 1px solid #999; padding: 6px; text-align: center; }
+select { width: 100%; }
+button { padding: 10px 20px; margin-top: 15px; }
 </style>
 </head>
 
 <body>
 
-<h1>Asistencia – Orquestando 2026</h1>
+<h2>Asistencia – Orquestando 2026</h2>
 
-<div class="controls">
-  <label>Educador:</label>
-  <select id="educador"></select>
+<label>Educador:</label>
+<select id="educador"></select>
 
-  <label>Fecha:</label>
-  <input type="date" id="fecha">
-</div>
+<label>Fecha:</label>
+<input type="date" id="fecha">
 
 <table>
-  <thead>
-    <tr>
-      <th>Alumno</th>
-      <th>Grupo</th>
-      <th>Asistencia</th>
-    </tr>
-  </thead>
-  <tbody id="tabla"></tbody>
+<thead>
+<tr>
+<th>Alumno</th>
+<th>Grupo</th>
+<th>Asistencia</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
 </table>
 
-<button onclick="guardarAsistencia()">Guardar Asistencia</button>
+<button onclick="guardar()">Guardar Asistencia</button>
 
-<script type="module">
-import { db } from "./firebase.js";
-import { collection, addDoc }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* URL raw del CSV */
-const CSV_URL =
-"https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/main/ninos.csv";
-
-let alumnos = [];
-let educadores = new Set();
-
-fetch(CSV_URL)
-  .then(res => {
-    if (!res.ok) throw new Error("No se cargó CSV");
-    return res.text();
-  })
-  .then(texto => {
-    // dividir por ocurrencia del encabezado para forzar filas
-    const partes = texto.split("EDUCADOR MUSICAL,");
-    partes.shift(); // quitar la primera parte vacía
-
-    partes.forEach(p => {
-      const fila = "EDUCADOR MUSICAL," + p.trim();
-      const cols = fila.split(",");
-
-      if (cols.length >= 4) {
-        const educador = cols[1].trim();
-        const grupo = cols[2].trim();
-        const nombres = cols[3].trim();
-        const apellidos = cols[4]?.trim() || "";
-
-        alumnos.push({
-          educador,
-          grupo,
-          nombreCompleto: `${nombres} ${apellidos}`
-        });
-
-        educadores.add(educador);
-      }
-    });
-
-    cargarEducadores();
-  })
-  .catch(err => {
-    console.error("Error leyendo CSV:", err);
-    alert("No se pudo procesar el CSV. Revisa la consola.");
-  });
-
-function cargarEducadores() {
-  const sel = document.getElementById("educador");
-  sel.innerHTML = `<option value="">Seleccione educador</option>`;
-
-  educadores.forEach(e => {
-    const opt = document.createElement("option");
-    opt.value = e;
-    opt.textContent = e;
-    sel.appendChild(opt);
-  });
-
-  sel.addEventListener("change", renderTabla);
-}
-
-function renderTabla() {
-  const educadorSel = document.getElementById("educador").value;
-  const tbody = document.getElementById("tabla");
-  tbody.innerHTML = "";
-
-  alumnos
-    .filter(a => a.educador === educadorSel)
-    .forEach(a => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${a.nombreCompleto}</td>
-          <td>${a.grupo}</td>
-          <td>
-            <select
-              data-alumno="${a.nombreCompleto}"
-              data-grupo="${a.grupo}"
-              data-educador="${a.educador}">
-              <option value="">-</option>
-              <option value="A">A</option>
-              <option value="T">T</option>
-              <option value="J">J</option>
-              <option value="F">F</option>
-            </select>
-          </td>
-        </tr>
-      `;
-    });
-}
-
-window.guardarAsistencia = async () => {
-  const fecha = document.getElementById("fecha").value;
-  if (!fecha) {
-    alert("Seleccione una fecha");
-    return;
-  }
-
-  const selects = document.querySelectorAll("select[data-alumno]");
-
-  for (let s of selects) {
-    if (s.value !== "") {
-      await addDoc(collection(db, "asistencias"), {
-        educador: s.dataset.educador,
-        grupo: s.dataset.grupo,
-        alumno: s.dataset.alumno,
-        fecha,
-        estado: s.value
-      });
-    }
-  }
-
-  alert("Asistencia registrada ✔");
-};
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
