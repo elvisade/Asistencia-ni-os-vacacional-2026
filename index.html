@@ -26,10 +26,34 @@ h2 { text-align: center; margin-bottom: 20px; }
 
 label { margin-right: 10px; }
 
-table { border-collapse: collapse; width: 100%; margin-top: 20px; background-color: rgba(0,0,0,0.6); color: #fff; }
-th, td { border: 1px solid #fff; padding: 6px; text-align: center; }
-select { width: 100%; }
-button { padding: 10px 20px; margin-top: 15px; cursor: pointer; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+  background-color: rgba(0,0,0,0.6);
+  color: #fff;
+}
+
+th, td {
+  border: 1px solid #fff;
+  padding: 6px;
+  text-align: center;
+}
+
+select, input[type="date"] {
+  padding: 5px;
+  margin: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+#reporte table {
+  margin-top: 10px;
+}
 </style>
 </head>
 
@@ -43,6 +67,9 @@ button { padding: 10px 20px; margin-top: 15px; cursor: pointer; }
 
 <label>Educador:</label>
 <select id="educador"></select>
+
+<label>Grupo:</label>
+<select id="grupo"></select>
 
 <label>Fecha:</label>
 <input type="date" id="fecha">
@@ -59,7 +86,9 @@ button { padding: 10px 20px; margin-top: 15px; cursor: pointer; }
 </table>
 
 <button onclick="guardar()">Guardar Asistencia</button>
-<button onclick="verMensual()">Ver Asistencias Mensual por Grupo</button>
+<button onclick="verMensual()">Ver Asistencias Mensual</button>
+
+<div id="reporte"></div>
 
 <script src="script.js"></script>
 </body>
