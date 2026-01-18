@@ -7,7 +7,6 @@ fetch(CSV_URL)
   .then(r => r.text())
   .then(texto => {
     const filas = texto.trim().split("\n").slice(1);
-
     filas.forEach(f => {
       const [educador, grupo, nombres, apellidos] = f.split(",");
       alumnos.push({
@@ -16,7 +15,6 @@ fetch(CSV_URL)
         nombre: `${nombres.trim()} ${apellidos.trim()}`
       });
     });
-
     cargarEducadores();
   });
 
@@ -35,7 +33,7 @@ function cargarGrupos() {
   const selGrupo = document.getElementById("grupo");
   const tbody = document.getElementById("tabla");
   tbody.innerHTML = "";
-  
+
   const grupos = [...new Set(alumnos.filter(a => a.educador === educador).map(a => a.grupo))];
 
   selGrupo.innerHTML = `<option value="">Seleccione grupo</option>`;
@@ -48,7 +46,6 @@ function cargarTabla() {
   const educador = document.getElementById("educador").value;
   const grupo = document.getElementById("grupo").value;
   const tbody = document.getElementById("tabla");
-
   tbody.innerHTML = "";
 
   alumnos.filter(a => a.educador === educador && a.grupo === grupo)
@@ -97,13 +94,41 @@ function guardar() {
   alert("Asistencia registrada ✔");
 }
 
-function verMensual() {
-  const educador = prompt("Educador:");
-  const grupo = prompt("Grupo:");
-  const mes = prompt("Mes y año (MM/YYYY):", "01/2026");
-  if (!educador || !grupo || !mes) return;
+function abrirPanelMensual() {
+  const panel = document.getElementById("panel-mensual");
+  const selEd = document.getElementById("m-educador");
 
-  const [m, y] = mes.split("/").map(Number);
+  panel.style.display = "block";
+  selEd.innerHTML = `<option value="">Seleccione</option>`;
+
+  const educadores = [...new Set(alumnos.map(a => a.educador))];
+  educadores.forEach(e => selEd.innerHTML += `<option value="${e}">${e}</option>`);
+
+  selEd.onchange = cargarGruposMensual;
+}
+
+function cargarGruposMensual() {
+  const ed = document.getElementById("m-educador").value;
+  const selGrupo = document.getElementById("m-grupo");
+
+  const grupos = [...new Set(alumnos.filter(a => a.educador === ed).map(a => a.grupo))];
+
+  selGrupo.innerHTML = `<option value="">Seleccione</option>`;
+  grupos.forEach(g => selGrupo.innerHTML += `<option value="${g}">${g}</option>`);
+}
+
+function generarCalendario() {
+  const educador = document.getElementById("m-educador").value;
+  const grupo = document.getElementById("m-grupo").value;
+  const mesInput = document.getElementById("m-mes").value;
+  const cont = document.getElementById("calendario");
+
+  if (!educador || !grupo || !mesInput) {
+    alert("Seleccione educador, grupo y mes");
+    return;
+  }
+
+  const [y, m] = mesInput.split("-").map(Number);
 
   const lista = registrosGuardados.filter(r => {
     const d = new Date(r.fecha);
@@ -113,25 +138,20 @@ function verMensual() {
            d.getFullYear() === y;
   });
 
-  const cont = document.getElementById("reporte");
-  cont.innerHTML = "";
+  const diasMes = new Date(y, m, 0).getDate();
+  let html = `<h4>Asistencia: ${mesInput} – ${educador} – Grupo ${grupo}</h4>`;
+  html += `<table><tr>`;
 
-  if (lista.length === 0) {
-    cont.innerHTML = `<p>No hay registros para ${mes}</p>`;
-    return;
+  for (let dia = 1; dia <= diasMes; dia++) {
+    const fecha = `${y}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const registros = lista.filter(r => r.fecha === fecha);
+
+    let marca = registros.map(r => `<span class="asistencia-${r.asistencia}">${r.asistencia}</span>`).join("<br>");
+
+    html += `<td><strong>${dia}</strong><br>${marca || "-"}</td>`;
+    if (dia % 7 === 0) html += `</tr><tr>`;
   }
 
-  cont.innerHTML = `
-    <h3>Asistencia ${mes} - Educador: ${educador} - Grupo: ${grupo}</h3>
-    <table style="border-collapse:collapse; width:100%; background:rgba(0,0,0,.6);">
-      <tr><th>Fecha</th><th>Alumno</th><th>Asistencia</th></tr>
-      ${lista.map(r => `
-        <tr>
-          <td>${r.fecha}</td>
-          <td>${r.alumno}</td>
-          <td>${r.asistencia}</td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
+  html += `</tr></table>`;
+  cont.innerHTML = html;
 }
