@@ -1,7 +1,7 @@
 const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/refs/heads/main/ninos.csv";
 
 let alumnos = [];
-let registrosGuardados = []; // Para simular la base de datos local
+let registrosGuardados = [];
 
 fetch(CSV_URL)
   .then(r => r.text())
@@ -25,19 +25,33 @@ function cargarEducadores() {
   const educadores = [...new Set(alumnos.map(a => a.educador))];
 
   sel.innerHTML = `<option value="">Seleccione educador</option>`;
-  educadores.forEach(e => {
-    sel.innerHTML += `<option value="${e}">${e}</option>`;
-  });
+  educadores.forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
 
-  sel.onchange = cargarTabla;
+  sel.onchange = cargarGrupos;
+}
+
+function cargarGrupos() {
+  const educador = document.getElementById("educador").value;
+  const selGrupo = document.getElementById("grupo");
+  const tbody = document.getElementById("tabla");
+  tbody.innerHTML = "";
+  
+  const grupos = [...new Set(alumnos.filter(a => a.educador === educador).map(a => a.grupo))];
+
+  selGrupo.innerHTML = `<option value="">Seleccione grupo</option>`;
+  grupos.forEach(g => selGrupo.innerHTML += `<option value="${g}">${g}</option>`);
+
+  selGrupo.onchange = cargarTabla;
 }
 
 function cargarTabla() {
   const educador = document.getElementById("educador").value;
+  const grupo = document.getElementById("grupo").value;
   const tbody = document.getElementById("tabla");
+
   tbody.innerHTML = "";
 
-  alumnos.filter(a => a.educador === educador)
+  alumnos.filter(a => a.educador === educador && a.grupo === grupo)
     .forEach((a, i) => {
       tbody.innerHTML += `
         <tr>
@@ -59,13 +73,14 @@ function cargarTabla() {
 function guardar() {
   const fecha = document.getElementById("fecha").value;
   const educador = document.getElementById("educador").value;
+  const grupo = document.getElementById("grupo").value;
 
-  if (!fecha || !educador) {
-    alert("Seleccione educador y fecha");
+  if (!fecha || !educador || !grupo) {
+    alert("Seleccione educador, grupo y fecha");
     return;
   }
 
-  alumnos.filter(a => a.educador === educador)
+  alumnos.filter(a => a.educador === educador && a.grupo === grupo)
     .forEach((a, i) => {
       const estado = document.getElementById(`a${i}`).value;
       if (estado) {
@@ -79,35 +94,44 @@ function guardar() {
       }
     });
 
-  console.table(registrosGuardados);
-  alert("Asistencia registrada ✔ (ver consola para detalles)");
+  alert("Asistencia registrada ✔");
 }
 
 function verMensual() {
-  const mes = prompt("Ingrese mes y año a consultar (MM/YYYY)", "01/2026");
-  if (!mes) return;
+  const educador = prompt("Educador:");
+  const grupo = prompt("Grupo:");
+  const mes = prompt("Mes y año (MM/YYYY):", "01/2026");
+  if (!educador || !grupo || !mes) return;
 
   const [m, y] = mes.split("/").map(Number);
-  if (!m || !y) { alert("Formato incorrecto"); return; }
 
-  // Filtrar registros por mes y agrupar por grupo
-  const porGrupo = {};
-
-  registrosGuardados.forEach(r => {
-    const fecha = new Date(r.fecha);
-    if (fecha.getMonth() + 1 === m && fecha.getFullYear() === y) {
-      if (!porGrupo[r.grupo]) porGrupo[r.grupo] = [];
-      porGrupo[r.grupo].push(r);
-    }
+  const lista = registrosGuardados.filter(r => {
+    const d = new Date(r.fecha);
+    return r.educador === educador &&
+           r.grupo === grupo &&
+           d.getMonth() + 1 === m &&
+           d.getFullYear() === y;
   });
 
-  console.log(`=== Asistencia mensual ${mes} ===`);
-  for (const grupo in porGrupo) {
-    console.log(`Grupo: ${grupo}`);
-    porGrupo[grupo].forEach(r => {
-      console.log(`${r.fecha} - ${r.alumno} - ${r.asistencia}`);
-    });
+  const cont = document.getElementById("reporte");
+  cont.innerHTML = "";
+
+  if (lista.length === 0) {
+    cont.innerHTML = `<p>No hay registros para ${mes}</p>`;
+    return;
   }
 
-  alert("Revisa la consola para ver asistencia mensual por grupo");
+  cont.innerHTML = `
+    <h3>Asistencia ${mes} - Educador: ${educador} - Grupo: ${grupo}</h3>
+    <table style="border-collapse:collapse; width:100%; background:rgba(0,0,0,.6);">
+      <tr><th>Fecha</th><th>Alumno</th><th>Asistencia</th></tr>
+      ${lista.map(r => `
+        <tr>
+          <td>${r.fecha}</td>
+          <td>${r.alumno}</td>
+          <td>${r.asistencia}</td>
+        </tr>
+      `).join('')}
+    </table>
+  `;
 }
