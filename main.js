@@ -1,6 +1,6 @@
 import { guardarAsistencia, leerMensual } from "./firebase.js";
 
-const CSV_URL = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/ninos.csv";
+const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/refs/heads/main/ninos.csv";
 
 let alumnos = [];
 let alumnosGrupo = [];
