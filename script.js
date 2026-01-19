@@ -3,8 +3,9 @@ const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vac
 let alumnos = [];
 let registrosGuardados = [];
 
-fetch(CSV_URL)
+fetch("https://cdn.jsdelivr.net/gh/elvisade/Asistencia-ni-os-vacacional-2026/ninos.csv")
   .then(r => r.text())
+  .then(t => console.log(t));
   .then(texto => {
     const filas = texto.trim().split("\n").slice(1);
     filas.forEach(f => {
