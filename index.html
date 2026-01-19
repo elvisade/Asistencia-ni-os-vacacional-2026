@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Asistencia – Orquestando 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
@@ -13,95 +14,98 @@ body {
   color: #fff;
 }
 
-header { text-align: center; margin-bottom: 20px; }
-header img { width: 200px; }
-
-h2 { text-align: center; margin-bottom: 10px; }
-
-label { margin-right: 10px; }
-
-select, input {
-  padding: 5px;
-  margin-right: 5px;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 15px;
-  background-color: rgba(0,0,0,0.5);
-  color: #fff;
-  font-size: 13px;
-}
-
-th, td {
-  border: 1px solid #fff;
-  padding: 5px;
+.header {
   text-align: center;
+  margin-bottom: 20px;
 }
 
-button {
-  padding: 10px;
-  margin-top: 10px;
+#filtros select {
+  margin: 5px;
+  padding: 6px;
+}
+
+#calendario {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dia {
+  background: rgba(0,0,0,0.65);
+  padding: 6px;
+  min-height: 110px;
   cursor: pointer;
+  border: 1px solid #fff;
+  font-size: 12px;
+}
+
+.dia h4 {
+  margin: 0;
+  font-size: 11px;
+  text-align: right;
+}
+
+.A { color: #00c700; font-weight:bold; }
+.T { color: #ff9800; font-weight:bold; }
+.J { color: #00c8ff; font-weight:bold; }
+.F { color: #ff3333; font-weight:bold; }
+.NO { color: #a8a8a8; font-weight:bold; }
+
+/* Modal */
+#modal {
+  position: fixed;
+  left:0; top:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#modal-content {
+  background:#fff;
+  color:#000;
+  padding: 20px;
+  width: 380px;
+  max-height: 440px;
+  overflow-y:auto;
+  border-radius: 8px;
+}
+
+#modal-content select {
+  width:100%;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <img src="logo-orquestando.png" alt="Logo Orquestando">
-</header>
+<div class="header">
+  <img src="logo-orquestando.png" width="200">
+  <h2>Asistencia – Orquestando</h2>
+</div>
 
-<h2>Asistencia – Orquestando 2026</h2>
+<div id="filtros">
+  <select id="educador"></select>
+  <select id="grupo"></select>
+  <select id="mes"></select>
+  <select id="anio"></select>
+  <button id="ver">Ver Calendario</button>
+</div>
 
-<label>Educador:</label>
-<select id="educador"></select>
+<div id="calendario"></div>
 
-<label>Grupo:</label>
-<select id="grupo"></select>
-
-<label>Fecha:</label>
-<input type="date" id="fecha">
-
-<button onclick="cargarTabla()">Cargar</button>
-<button onclick="guardar()">Guardar Asistencia</button>
-<button onclick="abrirConsulta()">Ver Asistencia Mensual</button>
-
-<table>
-<thead>
-<tr>
-<th>Alumno</th>
-<th>Asistencia</th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
-
-<!-- MODAL CONSULTA MENSUAL -->
-<div id="modal" style="display:none; background:rgba(0,0,0,0.85); position:fixed; top:0; left:0; width:100%; height:100%; padding:30px;">
-  <div style="background:#222; padding:20px; max-width:900px; margin:0 auto;">
-    <h3>Consulta Mensual</h3>
-
-    <label>Educador:</label>
-    <select id="m-educador" onchange="cargarGruposConsulta()"></select>
-
-    <label>Grupo:</label>
-    <select id="m-grupo"></select>
-
-    <label>Mes:</label>
-    <input type="month" id="m-mes" min="2020-01" max="2035-12">
-
-    <button onclick="generarCalendario()">Ver</button>
-    <button onclick="exportExcel()">Excel</button>
-    <button onclick="exportPDF()">PDF</button>
-    <button onclick="cerrarConsulta()">Cerrar</button>
-
-    <div id="calendario" style="margin-top:15px;"></div>
+<!-- MODAL -->
+<div id="modal">
+  <div id="modal-content">
+    <h3 id="modal-fecha"></h3>
+    <div id="modal-lista"></div>
+    <button id="guardar-modal">Guardar</button>
+    <button onclick="cerrarModal()">Cerrar</button>
   </div>
 </div>
 
-<script type="module" src="script.js"></script>
+<script type="module" src="firebase.js"></script>
+<script type="module" src="main.js"></script>
 </body>
 </html>
