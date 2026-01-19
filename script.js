@@ -1,158 +1,129 @@
+import { db } from "./firebase.js";
+import { doc, setDoc, getDocs, collection, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
 const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/refs/heads/main/ninos.csv";
 
 let alumnos = [];
-let registrosGuardados = [];
 
-fetch("https://cdn.jsdelivr.net/gh/elvisade/Asistencia-ni-os-vacacional-2026/ninos.csv")
+fetch(CSV_URL)
   .then(r => r.text())
-  .then(t => console.log(t));
-  .then(texto => {
-    const filas = texto.trim().split("\n").slice(1);
+  .then(text => {
+    const filas = text.trim().split("\n").slice(1);
     filas.forEach(f => {
       const [educador, grupo, nombres, apellidos] = f.split(",");
       alumnos.push({
         educador: educador.trim(),
         grupo: grupo.trim(),
-        nombre: `${nombres.trim()} ${apellidos.trim()}`
+        nombre: `${nombres.trim()} ${apellidos.trim()}`.trim()
       });
     });
     cargarEducadores();
+    cargarMeses();
+    cargarAnios();
   });
 
 function cargarEducadores() {
   const sel = document.getElementById("educador");
   const educadores = [...new Set(alumnos.map(a => a.educador))];
-
-  sel.innerHTML = `<option value="">Seleccione educador</option>`;
-  educadores.forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
-
+  sel.innerHTML = `<option value="">Educador</option>`;
+  educadores.forEach(e => sel.innerHTML += `<option>${e}</option>`);
   sel.onchange = cargarGrupos;
 }
 
 function cargarGrupos() {
   const educador = document.getElementById("educador").value;
-  const selGrupo = document.getElementById("grupo");
-  const tbody = document.getElementById("tabla");
-  tbody.innerHTML = "";
-
+  const sel = document.getElementById("grupo");
+  sel.innerHTML = `<option value="">Grupo</option>`;
   const grupos = [...new Set(alumnos.filter(a => a.educador === educador).map(a => a.grupo))];
-
-  selGrupo.innerHTML = `<option value="">Seleccione grupo</option>`;
-  grupos.forEach(g => selGrupo.innerHTML += `<option value="${g}">${g}</option>`);
-
-  selGrupo.onchange = cargarTabla;
+  grupos.forEach(g => sel.innerHTML += `<option>${g}</option>`);
+  sel.onchange = mostrarCalendario;
 }
 
-function cargarTabla() {
-  const educador = document.getElementById("educador").value;
-  const grupo = document.getElementById("grupo").value;
-  const tbody = document.getElementById("tabla");
-  tbody.innerHTML = "";
-
-  alumnos.filter(a => a.educador === educador && a.grupo === grupo)
-    .forEach((a, i) => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${a.nombre}</td>
-          <td>${a.grupo}</td>
-          <td>
-            <select id="a${i}">
-              <option value="">-</option>
-              <option value="A">A</option>
-              <option value="T">T</option>
-              <option value="J">J</option>
-              <option value="F">F</option>
-            </select>
-          </td>
-        </tr>`;
-    });
+function cargarMeses() {
+  const sel = document.getElementById("mes");
+  sel.innerHTML = `<option value="">Mes</option>`;
+  for (let i=1; i<=12; i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  sel.onchange = mostrarCalendario;
 }
 
-function guardar() {
-  const fecha = document.getElementById("fecha").value;
-  const educador = document.getElementById("educador").value;
-  const grupo = document.getElementById("grupo").value;
-
-  if (!fecha || !educador || !grupo) {
-    alert("Seleccione educador, grupo y fecha");
-    return;
-  }
-
-  alumnos.filter(a => a.educador === educador && a.grupo === grupo)
-    .forEach((a, i) => {
-      const estado = document.getElementById(`a${i}`).value;
-      if (estado) {
-        registrosGuardados.push({
-          fecha,
-          educador,
-          alumno: a.nombre,
-          grupo: a.grupo,
-          asistencia: estado
-        });
-      }
-    });
-
-  alert("Asistencia registrada ✔");
+function cargarAnios() {
+  const sel = document.getElementById("anio");
+  sel.innerHTML = `<option value="">Año</option>`;
+  for (let y=2024; y<=2030; y++) sel.innerHTML += `<option>${y}</option>`;
+  sel.onchange = mostrarCalendario;
 }
 
-function abrirPanelMensual() {
-  const panel = document.getElementById("panel-mensual");
-  const selEd = document.getElementById("m-educador");
+async function mostrarCalendario() {
+  const educador = educador.value;
+  const grupo = grupo.value;
+  const mes = mes.value;
+  const anio = anio.value;
 
-  panel.style.display = "block";
-  selEd.innerHTML = `<option value="">Seleccione</option>`;
+  if (!educador || !grupo || !mes || !anio) return;
 
-  const educadores = [...new Set(alumnos.map(a => a.educador))];
-  educadores.forEach(e => selEd.innerHTML += `<option value="${e}">${e}</option>`);
+  const lista = alumnos.filter(a => a.educador === educador && a.grupo === grupo);
+  const diasDelMes = new Date(anio, mes, 0).getDate();
 
-  selEd.onchange = cargarGruposMensual;
-}
+  let html = `<table><thead><tr><th>Alumno</th>`;
+  for (let d = 1; d <= diasDelMes; d++) html += `<th>${d}</th>`;
+  html += `</tr></thead><tbody>`;
 
-function cargarGruposMensual() {
-  const ed = document.getElementById("m-educador").value;
-  const selGrupo = document.getElementById("m-grupo");
-
-  const grupos = [...new Set(alumnos.filter(a => a.educador === ed).map(a => a.grupo))];
-
-  selGrupo.innerHTML = `<option value="">Seleccione</option>`;
-  grupos.forEach(g => selGrupo.innerHTML += `<option value="${g}">${g}</option>`);
-}
-
-function generarCalendario() {
-  const educador = document.getElementById("m-educador").value;
-  const grupo = document.getElementById("m-grupo").value;
-  const mesInput = document.getElementById("m-mes").value;
-  const cont = document.getElementById("calendario");
-
-  if (!educador || !grupo || !mesInput) {
-    alert("Seleccione educador, grupo y mes");
-    return;
-  }
-
-  const [y, m] = mesInput.split("-").map(Number);
-
-  const lista = registrosGuardados.filter(r => {
-    const d = new Date(r.fecha);
-    return r.educador === educador &&
-           r.grupo === grupo &&
-           d.getMonth() + 1 === m &&
-           d.getFullYear() === y;
+  lista.forEach(n => {
+    html += `<tr><td class="nombre">${n.nombre}</td>`;
+    for (let d = 1; d <= diasDelMes; d++) {
+      const fechaISO = `${anio}-${String(mes).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      html += `<td class="dia" data-nino="${n.nombre}" data-fecha="${fechaISO}"></td>`;
+    }
+    html += `</tr>`;
   });
 
-  const diasMes = new Date(y, m, 0).getDate();
-  let html = `<h4>Asistencia: ${mesInput} – ${educador} – Grupo ${grupo}</h4>`;
-  html += `<table><tr>`;
+  html += `</tbody></table>`;
+  contenedorCalendario.innerHTML = html;
 
-  for (let dia = 1; dia <= diasMes; dia++) {
-    const fecha = `${y}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
-    const registros = lista.filter(r => r.fecha === fecha);
+  await cargarAsistenciasMes(lista, anio, mes);
+}
 
-    let marca = registros.map(r => `<span class="asistencia-${r.asistencia}">${r.asistencia}</span>`).join("<br>");
+async function cargarAsistenciasMes(lista, anio, mes) {
+  const q = query(collection(db, "asistencias"));
+  const snap = await getDocs(q);
 
-    html += `<td><strong>${dia}</strong><br>${marca || "-"}</td>`;
-    if (dia % 7 === 0) html += `</tr><tr>`;
+  snap.forEach(docu => {
+    const { nino, fecha, letra } = docu.data();
+    const [Y, M] = fecha.split("-");
+
+    if (+Y === +anio && +M === +mes && lista.some(n => n.nombre === nino)) {
+      const celda = document.querySelector(`[data-fecha="${fecha}"][data-nino="${nino}"]`);
+      if (celda) pintarCelda(celda, letra);
+    }
+  });
+}
+
+document.addEventListener("click", async e => {
+  if (!e.target.classList.contains("dia")) return;
+
+  const opciones = ["A", "T", "J", "F", "NO", ""];
+  let actual = e.target.textContent;
+  let idx = opciones.indexOf(actual);
+  idx = (idx + 1) % opciones.length;
+  let letra = opciones[idx];
+
+  const nino = e.target.dataset.nino;
+  const fecha = e.target.dataset.fecha;
+
+  if (letra === "") {
+    pintarCelda(e.target, "");
+    await setDoc(doc(db, "asistencias", `${nino}_${fecha}`), { nino, fecha, letra:null }, { merge:true });
+    return;
   }
 
-  html += `</tr></table>`;
-  cont.innerHTML = html;
+  pintarCelda(e.target, letra);
+
+  await setDoc(doc(db, "asistencias", `${nino}_${fecha}`), {
+    nino, fecha, letra, ts:Date.now()
+  });
+});
+
+function pintarCelda(celda, letra) {
+  celda.className = "dia " + letra;
+  celda.textContent = letra;
 }
