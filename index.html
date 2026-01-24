@@ -2,33 +2,1199 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asistencia – Orquestando 2026</title>
-<link rel="stylesheet" href="style.css">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #fff;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  color: #333;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 3px solid #667eea;
+}
+
+.logo-placeholder {
+  width: 200px;
+  height: 80px;
+  margin: 0 auto 15px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+h1 {
+  color: #667eea;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.firebase-config {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.firebase-config h4 {
+  color: #856404;
+  margin-bottom: 10px;
+}
+
+.firebase-config textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ffc107;
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 12px;
+  min-height: 150px;
+}
+
+.firebase-config button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #ffc107;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.status-bar {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.status-bar.loading {
+  background: #fff3cd;
+  border-color: #ffc107;
+  color: #856404;
+}
+
+.status-bar.error {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #555;
+  font-size: 14px;
+}
+
+select, input[type="date"], input[type="month"] {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+select:focus, input[type="date"]:focus, input[type="month"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.leyenda {
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #2196f3;
+}
+
+.leyenda h4 {
+  color: #1976d2;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.leyenda-items {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 12px;
+  min-width: 25px;
+  text-align: center;
+}
+
+.badge-A { background: #4caf50; color: white; }
+.badge-T { background: #ff9800; color: white; }
+.badge-J { background: #2196f3; color: white; }
+.badge-F { background: #f44336; color: white; }
+
+.table-container {
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+thead {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+  background-color: #f8f9fa;
+}
+
+.radio-group {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+.radio-label {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 13px;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+  min-width: 40px;
+  text-align: center;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.radio-label-A { background: #e8f5e9; color: #2e7d32; }
+.radio-option input[type="radio"]:checked + .radio-label-A { 
+  background: #4caf50; color: white; border-color: #2e7d32;
+}
+
+.radio-label-T { background: #fff3e0; color: #e65100; }
+.radio-option input[type="radio"]:checked + .radio-label-T { 
+  background: #ff9800; color: white; border-color: #e65100;
+}
+
+.radio-label-J { background: #e3f2fd; color: #1565c0; }
+.radio-option input[type="radio"]:checked + .radio-label-J { 
+  background: #2196f3; color: white; border-color: #1565c0;
+}
+
+.radio-label-F { background: #ffebee; color: #c62828; }
+.radio-option input[type="radio"]:checked + .radio-label-F { 
+  background: #f44336; color: white; border-color: #c62828;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+}
+
+button {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+#mensaje {
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: none;
+  font-weight: 500;
+}
+
+.mensaje-exito {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.mensaje-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+#reporte {
+  margin-top: 30px;
+}
+
+.reporte-header {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.reporte-header h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.filtros-reporte {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.stat-card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.alumno-detalle {
+  margin-bottom: 25px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.alumno-detalle h4 {
+  color: #667eea;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.calendario-header {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #666;
+}
+
+.dia-calendario {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  font-size: 14px;
+  position: relative;
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.dia-calendario.vacio {
+  background: #fafafa;
+  border-color: transparent;
+}
+
+.dia-calendario.estado-A {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.dia-calendario.estado-T {
+  background: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.dia-calendario.estado-J {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1565c0;
+}
+
+.dia-calendario.estado-F {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.dia-numero {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.dia-estado {
+  font-size: 10px;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.resumen-alumno {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.resumen-item {
+  text-align: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+}
+
+.resumen-item strong {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  h1 {
+    font-size: 22px;
+  }
+  
+  .buttons {
+    flex-direction: column;
+  }
+  
+  button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .calendario {
+    gap: 4px;
+  }
+  
+  .dia-numero {
+    font-size: 14px;
+  }
+}
+</style>
 </head>
 <body>
+<div class="container">
+  <header>
+    <div class="logo-placeholder">🎵 Orquestando</div>
+    <h1>Sistema de Asistencia 2026</h1>
+  </header>
 
-<header>
-  <img src="logo-orquestando.png" alt="Logo Orquestando" class="logo">
-  <h2>Asistencia – Orquestando 2026</h2>
-</header>
+  <div id="firebaseSetup" class="firebase-config">
+    <h4>🔥 Configuración de Firebase (Solo la primera vez)</h4>
+    <p style="color: #856404; font-size: 13px; margin-bottom: 10px;">
+      Pega aquí tu configuración de Firebase:
+    </p>
+    <textarea id="firebaseConfigInput" placeholder='const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};'></textarea>
+    <button onclick="guardarConfigFirebase()">💾 Guardar y Conectar</button>
+  </div>
 
-<section class="filtros">
-  <label>Educador:</label>
-  <select id="educador"></select>
+  <div id="statusBar" class="status-bar loading hidden">
+    Conectando a Firebase...
+  </div>
 
-  <label>Grupo:</label>
-  <select id="grupo"></select>
+  <div id="csvUpload" class="firebase-config hidden">
+    <h4>📁 Cargar Base de Datos de Alumnos (Solo la primera vez)</h4>
+    <p style="color: #856404; font-size: 13px; margin-bottom: 10px;">
+      Sube tu archivo CSV: <strong>educador, grupo, nombres, apellidos</strong>
+    </p>
+    <input type="file" id="archivoCSV" accept=".csv">
+    <button onclick="cargarCSVFirebase()">📤 Subir a Firebase</button>
+    <span id="estadoCarga" style="margin-left: 10px; font-weight: bold;"></span>
+  </div>
 
-  <label>Mes:</label>
-  <select id="mes"></select>
+  <div id="appContent" class="hidden">
+    <div class="leyenda">
+      <h4>📋 Leyenda de Asistencia</h4>
+      <div class="leyenda-items">
+        <div class="leyenda-item">
+          <span class="badge badge-A">A</span>
+          <span>Asistió</span>
+        </div>
+        <div class="leyenda-item">
+          <span class="badge badge-T">T</span>
+          <span>Tardanza</span>
+        </div>
+        <div class="leyenda-item">
+          <span class="badge badge-J">J</span>
+          <span>Justificado</span>
+        </div>
+        <div class="leyenda-item">
+          <span class="badge badge-F">F</span>
+          <span>Falta</span>
+        </div>
+      </div>
+    </div>
 
-  <label>Año:</label>
-  <select id="anio"></select>
-</section>
+    <div class="controls">
+      <div class="control-group">
+        <label>👤 Educador:</label>
+        <select id="educador">
+          <option value="">Seleccionar...</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>👥 Grupo:</label>
+        <select id="grupo">
+          <option value="">Seleccionar...</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>📅 Fecha:</label>
+        <input type="date" id="fecha">
+      </div>
+    </div>
 
-<section id="contenedorCalendario"></section>
+    <div id="mensaje"></div>
 
-<script type="module" src="firebase.js"></script>
-<script type="module" src="script.js"></script>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Grupo</th>
+            <th style="text-align: center;">Estado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla">
+          <tr>
+            <td colspan="3" class="empty-state">Selecciona un grupo para ver los alumnos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="buttons">
+      <button class="btn-primary" onclick="guardarAsistencia()">
+        💾 Guardar Asistencia
+      </button>
+      <button class="btn-secondary" onclick="mostrarFiltrosReporte()">
+        📊 Ver Reporte Mensual
+      </button>
+    </div>
+
+    <div id="reporte"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+let db = null;
+let alumnosPorGrupo = {};
+let educadoresPorGrupo = {};
+let gruposDisponibles = [];
+let educadoresDisponibles = [];
+
+// Configurar fecha actual
+document.getElementById('fecha').valueAsDate = new Date();
+
+// Guardar configuración de Firebase
+window.guardarConfigFirebase = function() {
+  const configText = document.getElementById('firebaseConfigInput').value;
+  
+  try {
+    const match = configText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Formato inválido');
+    
+    const configString = match[0].replace(/(\w+):/g, '"$1":');
+    const firebaseConfig = JSON.parse(configString);
+    
+    localStorage.setItem('firebaseConfig', JSON.stringify(firebaseConfig));
+    
+    inicializarFirebase(firebaseConfig);
+    
+  } catch (error) {
+    alert('Error en la configuración. Verifica el formato.');
+  }
+};
+
+// Inicializar Firebase
+function inicializarFirebase(config) {
+  try {
+    const app = initializeApp(config);
+    db = getFirestore(app);
+    
+    document.getElementById('firebaseSetup').classList.add('hidden');
+    document.getElementById('statusBar').classList.remove('hidden');
+    document.getElementById('statusBar').textContent = '✅ Conectado a Firebase';
+    document.getElementById('statusBar').classList.remove('loading');
+    
+    cargarDatosFirebase();
+    
+  } catch (error) {
+    document.getElementById('statusBar').textContent = '❌ Error de conexión: ' + error.message;
+    document.getElementById('statusBar').classList.add('error');
+  }
+}
+
+// Cargar datos desde Firebase
+async function cargarDatosFirebase() {
+  try {
+    const alumnosSnap = await getDocs(collection(db, 'alumnos'));
+    
+    if (alumnosSnap.empty) {
+      document.getElementById('csvUpload').classList.remove('hidden');
+      return;
+    }
+    
+    alumnosPorGrupo = {};
+    educadoresPorGrupo = {};
+    const educadoresSet = new Set();
+    
+    alumnosSnap.forEach((doc) => {
+      const data = doc.data();
+      const grupo = data.grupo;
+      const nombre = data.nombre;
+      const educador = data.educador;
+      
+      if (!alumnosPorGrupo[grupo]) {
+        alumnosPorGrupo[grupo] = [];
+      }
+      alumnosPorGrupo[grupo].push(nombre);
+      
+      if (educador) {
+        educadoresPorGrupo[grupo] = educador;
+        educadoresSet.add(educador);
+      }
+    });
+    
+    gruposDisponibles = Object.keys(alumnosPorGrupo).sort();
+    educadoresDisponibles = Array.from(educadoresSet).sort();
+    
+    actualizarSelectores();
+    mostrarApp();
+    
+    const totalAlumnos = Object.values(alumnosPorGrupo).reduce((sum, arr) => sum + arr.length, 0);
+    document.getElementById('statusBar').textContent = `✅ ${totalAlumnos} alumnos cargados en ${gruposDisponibles.length} grupos`;
+    
+  } catch (error) {
+    console.error('Error cargando datos:', error);
+  }
+}
+
+// Cargar CSV a Firebase
+window.cargarCSVFirebase = async function() {
+  const archivo = document.getElementById('archivoCSV').files[0];
+  const estadoCarga = document.getElementById('estadoCarga');
+  
+  if (!archivo) {
+    estadoCarga.textContent = '❌ Selecciona un archivo';
+    estadoCarga.style.color = '#dc3545';
+    return;
+  }
+  
+  estadoCarga.textContent = '⏳ Procesando...';
+  estadoCarga.style.color = '#ffc107';
+  
+  try {
+    const texto = await archivo.text();
+    const lineas = texto.split('\n').filter(l => l.trim());
+    const separador = lineas[0].includes(';') ? ';' : ',';
+    
+    const header = lineas[0].split(separador).map(h => h.trim().toLowerCase());
+    const indiceEducador = header.findIndex(h => h.includes('educador'));
+    const indiceGrupo = header.findIndex(h => h.includes('grupo'));
+    const indiceNombres = header.findIndex(h => h.includes('nombre'));
+    const indiceApellidos = header.findIndex(h => h.includes('apellido'));
+    
+    let contador = 0;
+    
+    for (let i = 1; i < lineas.length; i++) {
+      const columnas = lineas[i].split(separador).map(c => c.trim());
+      
+      const educador = indiceEducador !== -1 ? columnas[indiceEducador] : '';
+      const grupo = columnas[indiceGrupo];
+      const nombres = columnas[indiceNombres] || '';
+      const apellidos = indiceApellidos !== -1 ? columnas[indiceApellidos] : '';
+      const nombreCompleto = `${nombres} ${apellidos}`.trim();
+      
+      if (nombreCompleto && grupo) {
+        await addDoc(collection(db, 'alumnos'), {
+          nombre: nombreCompleto,
+          grupo: grupo,
+          educador: educador,
+          fechaCreacion: new Date().toISOString()
+        });
+        contador++;
+      }
+    }
+    
+    estadoCarga.textContent = `✅ ${contador} alumnos subidos a Firebase`;
+    estadoCarga.style.color = '#28a745';
+    
+    setTimeout(() => {
+      cargarDatosFirebase();
+      document.getElementById('csvUpload').classList.add('hidden');
+    }, 2000);
+    
+  } catch (error) {
+    estadoCarga.textContent = `❌ Error: ${error.message}`;
+    estadoCarga.style.color = '#dc3545';
+  }
+};
+
+// Mostrar aplicación
+function mostrarApp() {
+  document.getElementById('appContent').classList.remove('hidden');
+  document.getElementById('grupo').addEventListener('change', actualizarTabla);
+}
+
+// Actualizar selectores
+function actualizarSelectores() {
+  const selectEducador = document.getElementById('educador');
+  const selectGrupo = document.getElementById('grupo');
+  
+  selectEducador.innerHTML = '<option value="">Seleccionar...</option>' +
+    educadoresDisponibles.map(e => `<option value="${e}">${e}</option>`).join('');
+  
+  selectGrupo.innerHTML = '<option value="">Seleccionar...</option>' +
+    gruposDisponibles.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+
+// Actualizar tabla
+function actualizarTabla() {
+  const grupo = document.getElementById('grupo').value;
+  const tbody = document.getElementById('tabla');
+  
+  if (!grupo) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Selecciona un grupo</td></tr>';
+    return;
+  }
+  
+  const alumnos = alumnosPorGrupo[grupo] || [];
+  
+  tbody.innerHTML = alumnos.map((alumno, idx) => `
+    <tr>
+      <td><strong>${alumno}</strong></td>
+      <td>${grupo}</td>
+      <td>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="asistencia_${idx}" value="A" checked>
+            <span class="radio-label radio-label-A">A</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="asistencia_${idx}" value="T">
+            <span class="radio-label radio-label-T">T</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="asistencia_${idx}" value="J">
+            <span class="radio-label radio-label-J">J</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="asistencia_${idx}" value="F">
+            <span class="radio-label radio-label-F">F</span>
+          </label>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// Guardar asistencia
+window.guardarAsistencia = async function() {
+  const educador = document.getElementById('educador').value;
+  const grupo = document.getElementById('grupo').value;
+  const fecha = document.getElementById('fecha').value;
+  
+  if (!educador || !grupo || !fecha) {
+    mostrarMensaje('Completa todos los campos', 'error');
+    return;
+  }
+  
+  const alumnos = alumnosPorGrupo[grupo] || [];
+  
+  try {
+    for (let idx = 0; idx < alumnos.length; idx++) {
+      const estado = document.querySelector(`input[name="asistencia_${idx}"]:checked`).value;
+      
+      await addDoc(collection(db, 'asistencias'), {
+        educador,
+        grupo,
+        fecha,
+        alumno: alumnos[idx],
+        estado,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    mostrarMensaje(`✅ Asistencia guardada para ${grupo} - ${fecha}`, 'exito');
+    
+  } catch (error) {
+    mostrarMensaje('Error al guardar: ' + error.message, 'error');
+  }
+};
+
+// Ver reporte
+window.mostrarFiltrosReporte = function() {
+  const ahora = new Date();
+  const mesActual = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
+  
+  document.getElementById('reporte').innerHTML = `
+    <div class="filtros-reporte">
+      <div class="control-group">
+        <label>📅 Mes:</label>
+        <input type="month" id="mesReporte" value="${mesActual}">
+      </div>
+      <div class="control-group">
+        <label>👤 Educador:</label>
+        <select id="educadorReporte">
+          <option value="">Todos</option>
+          ${educadoresDisponibles.map(e => `<option value="${e}">${e}</option>`).join('')}
+        </select>
+      </div>
+      <div class="control-group">
+        <label>👥 Grupo:</label>
+        <select id="grupoReporte">
+          <option value="">Todos</option>
+          ${gruposDisponibles.map(g => `<option value="${g}">${g}</option>`).join('')}
+        </select>
+      </div>
+      <div class="control-group" style="display: flex; align-items: flex-end;">
+        <button class="btn-primary" onclick="generarReporte()" style="width: 100%;">
+          🔍 Generar Reporte
+        </button>
+      </div>
+    </div>
+    <div id="contenidoReporte"></div>
+  `;
+};
+
+window.generarReporte = async function() {
+  const mesReporte = document.getElementById('mesReporte').value;
+  const educadorFiltro = document.getElementById('educadorReporte').value;
+  const grupoFiltro = document.getElementById('grupoReporte').value;
+  
+  if (!mesReporte) {
+    mostrarMensaje('Selecciona un mes', 'error');
+    return;
+  }
+  
+  const [anio, mes] = mesReporte.split('-').map(Number);
+  
+  try {
+    let q = query(collection(db, 'asistencias'));
+    const snapshot = await getDocs(q);
+    
+    const registros = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const fecha = new Date(data.fecha);
+      
+      const coincideMes = fecha.getMonth() === mes - 1 && fecha.getFullYear() === anio;
+      const coincideEducador = !educadorFiltro || data.educador === educadorFiltro;
+      const coincideGrupo = !grupoFiltro || data.grupo === grupoFiltro;
+      
+      if (coincideMes && coincideEducador && coincideGrupo) {
+        registros.push(data);
+      }
+    });
+    
+    if (registros.length === 0) {
+      document.getElementById('contenidoReporte').innerHTML = `
+        <div class="empty-state">
+          <h3>📊 No hay registros</h3>
+          <p>Intenta con otros filtros</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    const totalA = registros.filter(r => r.estado === 'A').length;
+    const totalT = registros.filter(r => r.estado === 'T').length;
+    const totalJ = registros.filter(r => r.estado === 'J').length;
+    const totalF = registros.filter(r => r.estado === 'F').length;
+    
+    const porAlumno = {};
+    registros.forEach(r => {
+      if (!porAlumno[r.alumno]) {
+        porAlumno[r.alumno] = { 
+          grupo: r.grupo,
+          educador: r.educador,
+          registros: {}
+        };
+      }
+      porAlumno[r.alumno].registros[r.fecha] = r.estado;
+    });
+    
+    let reporteHTML = `
+      <div class="reporte-header">
+        <h3>📊 Reporte de ${meses[mes - 1]} ${anio}</h3>
+        ${educadorFiltro ? `<p><strong>Educador:</strong> ${educadorFiltro}</p>` : ''}
+        ${grupoFiltro ? `<p><strong>Grupo:</strong> ${grupoFiltro}</p>` : ''}
+        <div class="estadisticas">
+          <div class="stat-card">
+            <div class="stat-number" style="color: #4caf50;">${totalA}</div>
+            <div class="stat-label">Asistencias</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #ff9800;">${totalT}</div>
+            <div class="stat-label">Tardanzas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #2196f3;">${totalJ}</div>
+            <div class="stat-label">Justificados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #f44336;">${totalF}</div>
+            <div class="stat-label">Faltas</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin: 20px 0;">
+        <button class="btn-success" onclick="descargarExcel()">
+          📥 Descargar Reporte Excel
+        </button>
+      </div>
+    `;
+    
+    Object.entries(porAlumno).forEach(([alumno, data]) => {
+      const contadores = {
+        A: Object.values(data.registros).filter(e => e === 'A').length,
+        T: Object.values(data.registros).filter(e => e === 'T').length,
+        J: Object.values(data.registros).filter(e => e === 'J').length,
+        F: Object.values(data.registros).filter(e => e === 'F').length
+      };
+      
+      reporteHTML += `
+        <div class="alumno-detalle">
+          <h4>👤 ${alumno} - ${data.grupo}</h4>
+          <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Educador: ${data.educador}</p>
+          
+          <div class="resumen-alumno">
+            <div class="resumen-item" style="border-left: 4px solid #4caf50;">
+              <strong style="color: #4caf50;">${contadores.A}</strong>
+              <small>Asistió</small>
+            </div>
+            <div class="resumen-item" style="border-left: 4px solid #ff9800;">
+              <strong style="color: #ff9800;">${contadores.T}</strong>
+              <small>Tardanza</small>
+            </div>
+            <div class="resumen-item" style="border-left: 4px solid #2196f3;">
+              <strong style="color: #2196f3;">${contadores.J}</strong>
+              <small>Justificado</small>
+            </div>
+            <div class="resumen-item" style="border-left: 4px solid #f44336;">
+              <strong style="color: #f44336;">${contadores.F}</strong>
+              <small>Falta</small>
+            </div>
+          </div>
+          
+          ${generarCalendario(anio, mes - 1, data.registros)}
+        </div>
+      `;
+    });
+    
+    document.getElementById('contenidoReporte').innerHTML = reporteHTML;
+    window.datosReporteActual = { registros, mes: meses[mes - 1], anio, porAlumno };
+    
+  } catch (error) {
+    mostrarMensaje('Error al generar reporte: ' + error.message, 'error');
+  }
+};
+
+function generarCalendario(anio, mes, registros) {
+  const primerDia = new Date(anio, mes, 1);
+  const ultimoDia = new Date(anio, mes + 1, 0);
+  const diasMes = ultimoDia.getDate();
+  const primerDiaSemana = primerDia.getDay();
+  
+  const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  
+  let html = '<div class="calendario">';
+  
+  diasSemana.forEach(dia => {
+    html += `<div class="calendario-header">${dia}</div>`;
+  });
+  
+  for (let i = 0; i < primerDiaSemana; i++) {
+    html += '<div class="dia-calendario vacio"></div>';
+  }
+  
+  for (let dia = 1; dia <= diasMes; dia++) {
+    const fechaActual = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    const estado = registros[fechaActual];
+    
+    const claseEstado = estado ? `estado-${estado}` : '';
+    const textoEstado = estado ? `<div class="dia-estado">${estado}</div>` : '';
+    
+    html += `
+      <div class="dia-calendario ${claseEstado}">
+        <div class="dia-numero">${dia}</div>
+        ${textoEstado}
+      </div>
+    `;
+  }
+  
+  html += '</div>';
+  return html;
+}
+
+window.descargarExcel = function() {
+  if (!window.datosReporteActual) {
+    mostrarMensaje('No hay datos para exportar', 'error');
+    return;
+  }
+  
+  const { registros, mes, anio, porAlumno } = window.datosReporteActual;
+  
+  let csv = `Reporte de Asistencia - ${mes} ${anio}\n\n`;
+  csv += 'Alumno,Grupo,Educador,Asistencias,Tardanzas,Justificados,Faltas,Total Clases\n';
+  
+  Object.entries(porAlumno).forEach(([alumno, data]) => {
+    const contadores = {
+      A: Object.values(data.registros).filter(e => e === 'A').length,
+      T: Object.values(data.registros).filter(e => e === 'T').length,
+      J: Object.values(data.registros).filter(e => e === 'J').length,
+      F: Object.values(data.registros).filter(e => e === 'F').length
+    };
+    const total = contadores.A + contadores.T + contadores.J + contadores.F;
+    
+    csv += `${alumno},${data.grupo},${data.educador},${contadores.A},${contadores.T},${contadores.J},${contadores.F},${total}\n`;
+  });
+  
+  csv += '\n\nDetalle por Fecha\n';
+  csv += 'Fecha,Alumno,Grupo,Educador,Estado\n';
+  
+  registros.forEach(r => {
+    const fechaFormateada = new Date(r.fecha).toLocaleDateString('es-PE');
+    const estadoTexto = {
+      'A': 'Asistió',
+      'T': 'Tardanza',
+      'J': 'Justificado',
+      'F': 'Falta'
+    }[r.estado];
+    
+    csv += `${fechaFormateada},${r.alumno},${r.grupo},${r.educador},${estadoTexto}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Reporte_Asistencia_${mes}_${anio}.csv`);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  mostrarMensaje('✅ Reporte descargado', 'exito');
+};
+
+function mostrarMensaje(texto, tipo) {
+  const div = document.getElementById('mensaje');
+  div.textContent = texto;
+  div.className = tipo === 'exito' ? 'mensaje-exito' : 'mensaje-error';
+  div.style.display = 'block';
+  
+  setTimeout(() => {
+    div.style.display = 'none';
+  }, 4000);
+}
+
+// Auto-iniciar si ya hay config
+const savedConfig = localStorage.getItem('firebaseConfig');
+if (savedConfig) {
+  const config = JSON.parse(savedConfig);
+  document.getElementById('firebaseConfigInput').value = JSON.stringify(config, null, 2);
+  inicializarFirebase(config);
+} else {
+  document.getElementById('firebaseSetup').classList.remove('hidden');
+}
+
+</script>
 </body>
 </html>
