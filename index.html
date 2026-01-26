@@ -28,7 +28,7 @@ header img{
   max-width:220px;
 }
 
-h2{ color:#5a4bcf; }
+h2,h3{ color:#5a4bcf; }
 
 select, input[type="date"]{
   padding:8px;
@@ -52,6 +52,12 @@ th{
   color:white;
 }
 
+/* COLORES ASISTENCIA */
+.A { background:#2ecc71; color:white; font-weight:bold; }
+.T { background:#f39c12; color:white; font-weight:bold; }
+.J { background:#3498db; color:white; font-weight:bold; }
+.F { background:#e74c3c; color:white; font-weight:bold; }
+
 button{
   padding:10px 20px;
   margin:5px;
@@ -65,6 +71,7 @@ button{
 </head>
 
 <body>
+
 <div class="container">
 
 <header>
@@ -107,11 +114,11 @@ button{
 const CSV_URL = "https://raw.githubusercontent.com/elvisade/Asistencia-ni-os-vacacional-2026/main/ninos.csv";
 
 let estructura = {};   // educador -> grupo -> alumnos
-let asistencias = [];  // registros guardados
+let asistencias = [];  // registros
 
-/* =======================
+/* ======================
    CARGA CSV
-======================= */
+====================== */
 fetch(CSV_URL)
 .then(r=>r.text())
 .then(text=>{
@@ -134,13 +141,14 @@ fetch(CSV_URL)
     estructura[edu][grupo].push(alumno);
   }
 
-  educador.innerHTML = `<option value="">Seleccione</option>` +
+  educador.innerHTML =
+    `<option value="">Seleccione</option>` +
     Object.keys(estructura).map(e=>`<option>${e}</option>`).join("");
 });
 
-/* =======================
-   EVENTOS
-======================= */
+/* ======================
+   CAMBIO EDUCADOR
+====================== */
 educador.onchange = () => {
   grupo.innerHTML = `<option value="">Seleccione</option>`;
   tabla.innerHTML = "";
@@ -152,45 +160,46 @@ educador.onchange = () => {
 
 grupo.onchange = cargarTabla;
 
-/* =======================
-   TABLA ASISTENCIA
-======================= */
+/* ======================
+   TABLA MARCADO
+====================== */
 function cargarTabla(){
   tabla.innerHTML = "";
   const alumnos = estructura[educador.value][grupo.value];
+
   alumnos.forEach((a,i)=>{
     tabla.innerHTML += `
-      <tr>
-        <td>${a}</td>
-        <td>
-          <select id="a${i}">
-            <option value="">-</option>
-            <option>A</option>
-            <option>T</option>
-            <option>J</option>
-            <option>F</option>
-          </select>
-        </td>
-      </tr>`;
+    <tr>
+      <td>${a}</td>
+      <td>
+        <select id="a${i}" onchange="this.className=this.value">
+          <option value="">-</option>
+          <option value="A" class="A">A</option>
+          <option value="T" class="T">T</option>
+          <option value="J" class="J">J</option>
+          <option value="F" class="F">F</option>
+        </select>
+      </td>
+    </tr>`;
   });
 }
 
-/* =======================
-   GUARDAR ASISTENCIA
-======================= */
+/* ======================
+   GUARDAR
+====================== */
 function guardarAsistencia(){
   if(!fecha.value){ alert("Seleccione fecha"); return; }
 
   const alumnos = estructura[educador.value][grupo.value];
   alumnos.forEach((a,i)=>{
-    const val = document.getElementById(`a${i}`).value;
-    if(val){
+    const estado = document.getElementById(`a${i}`).value;
+    if(estado){
       asistencias.push({
         fecha: fecha.value,
         educador: educador.value,
         grupo: grupo.value,
         alumno: a,
-        estado: val
+        estado
       });
     }
   });
@@ -198,48 +207,69 @@ function guardarAsistencia(){
   alert("✔ Asistencia guardada");
 }
 
-/* =======================
-   REPORTE VISUAL
-======================= */
+/* ======================
+   REPORTE RESUMIDO
+====================== */
 function verReporteMensual(){
   const mes = prompt("Mes/Año (MM/YYYY)", "01/2026");
   if(!mes) return;
 
-  const [m,y]=mes.split("/").map(Number);
-  const filtrado = asistencias.filter(r=>{
-    const d=new Date(r.fecha);
-    return d.getMonth()+1===m && d.getFullYear()===y;
+  const [m,y] = mes.split("/").map(Number);
+  const resumen = {};
+
+  asistencias.forEach(r=>{
+    const d = new Date(r.fecha);
+    if(d.getMonth()+1===m && d.getFullYear()===y){
+      const key = r.alumno + r.grupo;
+      if(!resumen[key]){
+        resumen[key] = { alumno:r.alumno, grupo:r.grupo, A:0,T:0,J:0,F:0 };
+      }
+      resumen[key][r.estado]++;
+    }
   });
 
-  let html = `<h3>Reporte ${mes}</h3><table><tr>
-    <th>Fecha</th><th>Grupo</th><th>Alumno</th><th>Estado</th></tr>`;
+  let html = `<h3>Reporte mensual ${mes}</h3>
+  <table>
+  <tr>
+    <th>Alumno</th>
+    <th>Grupo</th>
+    <th class="A">A</th>
+    <th class="T">T</th>
+    <th class="J">J</th>
+    <th class="F">F</th>
+  </tr>`;
 
-  filtrado.forEach(r=>{
-    html+=`<tr>
-      <td>${r.fecha}</td>
-      <td>${r.grupo}</td>
+  Object.values(resumen).forEach(r=>{
+    html += `
+    <tr>
       <td>${r.alumno}</td>
-      <td>${r.estado}</td>
+      <td>${r.grupo}</td>
+      <td class="A">${r.A}</td>
+      <td class="T">${r.T}</td>
+      <td class="J">${r.J}</td>
+      <td class="F">${r.F}</td>
     </tr>`;
   });
 
-  html+="</table>";
-  reporte.innerHTML = html;
+  html += "</table>";
+  document.getElementById("reporte").innerHTML = html;
 }
 
-/* =======================
+/* ======================
    DESCARGAR CSV
-======================= */
+====================== */
 function descargarReporte(){
-  let csv = "Fecha,Educador,Grupo,Alumno,Estado\n";
-  asistencias.forEach(r=>{
-    csv+=`${r.fecha},${r.educador},${r.grupo},${r.alumno},${r.estado}\n`;
+  let csv = "Alumno,Grupo,A,T,J,F\n";
+  document.querySelectorAll("#reporte table tr").forEach((tr,i)=>{
+    if(i>0){
+      csv += [...tr.children].map(td=>td.innerText).join(",")+"\n";
+    }
   });
 
   const blob = new Blob([csv],{type:"text/csv"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "asistencia_orquestando_2026.csv";
+  a.download = "reporte_mensual_orquestando.csv";
   a.click();
 }
 </script>
